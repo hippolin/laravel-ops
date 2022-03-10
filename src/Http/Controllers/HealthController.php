@@ -3,6 +3,7 @@
 namespace Pixelvide\Ops\Http\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 
 class HealthController extends Controller
 {
@@ -30,13 +31,13 @@ class HealthController extends Controller
 
                 // Suhosin likes to throw a warning if exec is disabled then die - weird
                 if ($func_blacklist = @ini_get('suhosin.executor.func.blacklist')) {
-                    if (strpos(",".$func_blacklist.",", 'exec') !== false) {
+                    if (strpos("," . $func_blacklist . ",", 'exec') !== false) {
                         return "Unknown";
                     }
                 }
                 // PHP disabled functions?
                 if ($func_blacklist = @ini_get('disable_functions')) {
-                    if (strpos(",".$func_blacklist.",", 'exec') !== false) {
+                    if (strpos("," . $func_blacklist . ",", 'exec') !== false) {
                         return "Unknown";
                     }
                 }
@@ -81,15 +82,15 @@ class HealthController extends Controller
     protected static function formatSizeUnits($bytes)
     {
         if ($bytes >= 1073741824) {
-            $bytes = number_format($bytes / 1073741824, 2).' GB';
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
         } elseif ($bytes >= 1048576) {
-            $bytes = number_format($bytes / 1048576, 2).' MB';
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
         } elseif ($bytes >= 1024) {
-            $bytes = number_format($bytes / 1024, 2).' KB';
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
         } elseif ($bytes > 1) {
-            $bytes = $bytes.' bytes';
+            $bytes = $bytes . ' bytes';
         } elseif ($bytes == 1) {
-            $bytes = $bytes.' byte';
+            $bytes = $bytes . ' byte';
         } else {
             $bytes = '0 bytes';
         }
@@ -133,5 +134,25 @@ class HealthController extends Controller
         $response['disk']['total'] = self::formatSizeUnits(disk_total_space('/'));
 
         return $response;
+    }
+
+    /**
+     * Check database connection
+     *
+     * @return respose
+     */
+    public function healthz()
+    {
+        try {
+            $test = DB::connection()->select('SELECT 1');
+
+            if (count($test) > 0) {
+                return response("OK\n", 200);
+            } else {
+                return response("unhealthy\n", 500);
+            }
+        } catch (\Exception $e) {
+            return response("unhealthy\n", 500);
+        }
     }
 }
