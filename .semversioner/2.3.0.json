@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Laravel 11, 12, and 13 support",
+    "type": "minor"
+  },
+  {
+    "description": "Private IP allowlist for Ops routes",
+    "type": "minor"
+  },
+  {
+    "description": "PHPUnit-free test runner added for package verification",
+    "type": "patch"
+  }
+]

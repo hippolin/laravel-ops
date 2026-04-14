@@ -20,8 +20,6 @@ class OpsServiceProvider extends ServiceProvider
             return;
         }
 
-        Route::middlewareGroup('ops', config('ops.middleware', []));
-
         $this->registerRoutes();
         $this->registerPublishing();
     }
@@ -49,7 +47,10 @@ class OpsServiceProvider extends ServiceProvider
             'domain'     => config('ops.domain', null),
             'namespace'  => 'Pixelvide\Ops\Http\Controllers',
             'prefix'     => config('ops.path'),
-            'middleware' => 'ops',
+            'middleware' => array_merge(
+                [Http\Middleware\AllowPrivateIps::class],
+                (array) config('ops.middleware', [])
+            ),
         ];
     }
 
